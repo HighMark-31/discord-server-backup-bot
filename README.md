@@ -85,7 +85,7 @@ If you find this bot useful, please consider leaving a review on [Trustpilot](ht
 ## 📞 Contact
 
 Official Website: [https://highmark.it](https://highmark.it)
-GitHub: [https://github.com/highmark-31/backup-server-discord-bot](https://github.com/HighMark-31/discord-server-backup-bot/)
+GitHub: [https://github.com/HighMark-31/discord-server-backup-bot/](https://github.com/HighMark-31/discord-server-backup-bot/)
 
 ---
 
