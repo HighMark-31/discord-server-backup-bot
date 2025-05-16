@@ -1,0 +1,5 @@
+Copyright (c) 2025 Highmark.it
+
+Permission is hereby granted, free of charge, to use this software, including modifications, but with the explicit requirement that all copies and derivatives retain the original credits to Highmark.it in the source code files and documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND
