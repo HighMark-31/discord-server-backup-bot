@@ -21,7 +21,7 @@
 ## 🚀 How to Use
 
 1. **Invite the bot** to your Discord server with Administrator permissions and enable necessary intents (especially *Server Members Intent*).
-2. Run the bot by replacing `YOUR_TOKEN_HERE` with your bot’s token.
+2. Run the bot by replacing `TOKEN` with your bot’s token.
 3. Type the command in any text channel to start the backup:
 
    ```
