@@ -1,6 +1,6 @@
 # Discord Server Backup Bot
 
-[![Stars](https://img.shields.io/github/stars/highmark-31/discord-server-backup-bot?style=social)](https://github.com/highmark-31/discord-server-backup-bot/stargazers)
+[![Stars](https://img.shields.io/github/stars/HighMark-31/discord-server-backup-bot?style=social)](https://github.com/HighMark-31/discord-server-backup-bot/stargazers)
 
 **Discord Server Backup Bot** is a powerful Discord bot designed for server administrators to easily perform complete backups of their server’s messages, media, emojis, roles, member data, and general server information—all automated and neatly organized.
 
@@ -28,7 +28,7 @@
    !backup
    ```
 4. The bot will create a backup folder containing all server data and show progress updates directly in the chat message.
-5. Once complete, an embed message will display credits and politely ask for a review on [Trustpilot](https://www.trustpilot.com/review/highmark.it) and a ⭐ on the [GitHub repo](https://github.com/highmark-31/discord-server-backup-bot).
+5. Once complete, an embed message will display credits and politely ask for a review on [Trustpilot](https://www.trustpilot.com/review/highmark.it) and a ⭐ on the [GitHub repo](https://github.com/HighMark-31/discord-server-backup-bot/).
 
 ---
 
@@ -78,14 +78,14 @@ This project is distributed under a **custom license** that allows usage and mod
 
 ## 🙏 Credits & Feedback
 
-If you find this bot useful, please consider leaving a review on [Trustpilot](https://www.trustpilot.com/review/highmark.it) and giving a ⭐ to our [GitHub repo](https://github.com/highmark-31/backup-server-discord-bot)!
+If you find this bot useful, please consider leaving a review on [Trustpilot](https://www.trustpilot.com/review/highmark.it) and giving a ⭐ to our [GitHub repo](https://github.com/HighMark-31/discord-server-backup-bot/)!
 
 ---
 
 ## 📞 Contact
 
 Official Website: [https://highmark.it](https://highmark.it)
-GitHub: [https://github.com/highmark-31/backup-server-discord-bot](https://github.com/highmark-31/discord-server-backup-bot)
+GitHub: [https://github.com/highmark-31/backup-server-discord-bot](https://github.com/HighMark-31/discord-server-backup-bot/)
 
 ---
 
