@@ -1,6 +1,7 @@
 # Discord Server Backup Bot
 
 [![Stars](https://img.shields.io/github/stars/HighMark-31/discord-server-backup-bot?style=social)](https://github.com/HighMark-31/discord-server-backup-bot/stargazers)
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=HighMark-31.discord-server-backup-bot)
 
 **Discord Server Backup Bot** is a powerful Discord bot designed for server administrators to easily perform complete backups of their server’s messages, media, emojis, roles, member data, and general server information—all automated and neatly organized.
 
