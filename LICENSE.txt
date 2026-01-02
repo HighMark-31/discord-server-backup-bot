@@ -1,5 +1,222 @@
-Copyright (c) 2025 Highmark.it
+================================================================================
+                    DISCORD SERVER BACKUP BOT LICENSE v2.0
+                          Custom License Agreement
+================================================================================
 
-Permission is hereby granted, free of charge, to use this software, including modifications, but with the explicit requirement that all copies and derivatives retain the original credits to Highmark.it in the source code files and documentation.
+Copyright (c) 2025-2026 HighMark (HighMark-31)
+Original Author: HighMark (https://highmark.it)
+Project: Discord Server Backup Bot
+Version: 2.0+
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND
+Repositories:
+- GitHub: https://github.com/HighMark-31/discord-server-backup-bot
+- Website: https://highmark.it
+
+================================================================================
+                              TERMS & CONDITIONS
+================================================================================
+
+1. GRANT OF LICENSE
+   ----------------
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to use,
+   copy, and modify the Software, subject to the strict conditions outlined in
+   this License.
+
+   This License grants you the right to:
+   ✓ Use the Software for personal or commercial purposes
+   ✓ Modify and adapt the Software to add/remove features and functionality
+   ✓ Create derivative works based on the Software
+   ✓ Distribute modified versions (with restrictions - see Section 3)
+   ✓ Study and analyze the source code
+
+2. MANDATORY REQUIREMENTS
+   ----------------------
+   Use of this Software is ONLY permitted if ALL of the following conditions
+   are met:
+
+   2.1 CREDIT PRESERVATION
+       All copies, modified versions, and derivative works MUST retain:
+       
+       a) The original copyright notice:
+          "Copyright (c) 2025 HighMark (HighMark-31)"
+       
+       b) The original author attribution:
+          "Original Author: HighMark"
+       
+       c) References to the original project:
+          "Based on Discord Server Backup Bot by HighMark"
+          "Original: https://github.com/HighMark-31/discord-server-backup-bot"
+       
+       d) In source code: Must include original credits in comments at the top
+          of all files and in any "about" or "credits" sections of the project
+
+   2.2 NO CODE REUSE WITHOUT ATTRIBUTION
+       
+       You CANNOT:
+       ✗ Copy, extract, or use code from the original Software without
+         explicitly mentioning its source in your own project
+       ✗ Claim code or algorithms as your own original work
+       ✗ Remove or obscure attribution comments from copied code
+       ✗ Use the Software's core logic/architecture without crediting HighMark
+       ✗ Distribute the Software or substantial portions without maintaining
+         this License file and all original copyright notices
+
+   2.3 IDEA & CONCEPT ATTRIBUTION
+       
+       If you derive concepts, design patterns, or architectural ideas from
+       this Software, you MUST acknowledge the original source in:
+       
+       a) Project README file
+       b) Documentation
+       c) "About" or "Credits" section of the application
+       d) In relevant source code comments
+       
+       Example format:
+       "Inspired by Discord Server Backup Bot by HighMark"
+       or
+       "Built upon concepts from HighMark's Discord Server Backup Bot"
+
+   2.4 LICENSE FILE INCLUSION
+       
+       Every distribution, fork, or derivative work MUST include:
+       ✓ A copy of this LICENSE.txt file in the root directory
+       ✓ A clear notice that the project is based on/derived from the
+         original Discord Server Backup Bot
+
+3. DISTRIBUTION & SHARING
+   ----------------------
+   
+   3.1 You may share, fork, and distribute modified versions ONLY if:
+       ✓ All credits remain intact
+       ✓ The LICENSE.txt file is included and unchanged
+       ✓ Any documentation mentions the original project and author
+       ✓ The project is clearly marked as a derivative work
+
+   3.2 You may NOT:
+       ✗ Remove or modify this License
+       ✗ Claim the original work as your own
+       ✗ Hide or obscure the original author's attribution
+       ✗ Distribute without including this LICENSE file
+
+4. PROHIBITED USES
+   ---------------
+   
+   You are EXPLICITLY PROHIBITED from:
+   
+   ✗ Removing, hiding, or obscuring any copyright notices or credits
+   ✗ Claiming the original work as your own creation
+   ✗ Using code snippets, functions, or algorithms without attribution
+   ✗ Creating closed-source versions without proper licensing
+   ✗ Claiming ideas, concepts, or design patterns as original
+   ✗ Removing HighMark's name or link from the project
+   ✗ Distributing modified versions without maintaining this License
+
+5. MODIFICATIONS & DERIVATIVE WORKS
+   --------------------------------
+   
+   5.1 You may freely:
+       ✓ Add new features and functionality
+       ✓ Remove or modify existing features
+       ✓ Refactor and optimize code
+       ✓ Create completely new modules or extensions
+       ✓ Adapt the Software for different use cases
+
+   5.2 When creating derivatives, you MUST:
+       ✓ Clearly mark which code is modified vs. original
+       ✓ Document changes and additions
+       ✓ Maintain copyright notices for original code sections
+       ✓ Credit HighMark as the original author
+       ✓ Include this License with your distribution
+
+6. COMMERCIAL USE
+   ---------------
+   
+   Commercial use of the Software or derivatives IS PERMITTED, provided that:
+   ✓ All mandatory requirements in Section 2 are strictly followed
+   ✓ Original HighMark copyright notices remain intact
+   ✓ Attribution is clearly visible to end users
+   ✓ This License is included and not modified
+
+7. NO WARRANTIES & LIABILITY
+   -------------------------
+   
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   
+   IN NO EVENT SHALL THE AUTHOR (HighMark) BE LIABLE FOR ANY CLAIM, DAMAGES,
+   OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+8. TERMINATION
+   -----------
+   
+   This License is terminated immediately if you:
+   ✗ Remove or hide copyright notices
+   ✗ Claim the work as your own
+   ✗ Violate the credit/attribution requirements
+   ✗ Distribute without this License
+   
+   Upon termination, you must:
+   ✓ Stop using the Software
+   ✓ Delete all copies (except legally required backups)
+   ✓ Cease distribution of any derivatives
+
+9. ENFORCEMENT
+   -----------
+   
+   HighMark reserves the right to:
+   ✓ Require removal of non-compliant versions
+   ✓ Request correction of attribution
+   ✓ Take legal action for license violations
+   ✓ Issue cease-and-desist notices
+   ✓ Seek damages for willful copyright infringement
+
+10. DEFINITIONS
+    -----------
+    
+    "Software": The Discord Server Backup Bot and all related source code,
+                documentation, and associated files.
+    
+    "Author": HighMark (HighMark-31)
+    
+    "You/Your": Any individual or entity using, modifying, or distributing
+               the Software or derivatives thereof.
+    
+    "Derivative Work": Any modification, adaptation, or work based on or
+                       containing any portion of the Software.
+    
+    "Distribution": Sharing, publishing, uploading, or making available to
+                    others (publicly or privately) the Software or derivatives.
+
+11. GOVERNING LAW
+    ---------------
+    
+    This License is governed by and construed in accordance with applicable laws.
+    Any disputes arising from this License shall be resolved through negotiation,
+    mediation, or legal proceedings as appropriate.
+
+12. CONTACT & INQUIRIES
+    -------------------
+    
+    For license inquiries, permissions, or exceptions:
+    ✓ Website: https://highmark.it
+    ✓ GitHub: https://github.com/HighMark-31/discord-server-backup-bot
+
+================================================================================
+                          ACKNOWLEDGMENT OF TERMS
+================================================================================
+
+By using this Software, you acknowledge that you have read, understood, and
+agree to comply with all terms and conditions of this License. Continued use
+constitutes acceptance of these terms.
+
+If you do not agree with any provision of this License, you MUST cease use
+and delete all copies of the Software immediately.
+
+================================================================================
+Version 1.0 | Last Updated: January 2026
+Copyright (c) 2025-2026 HighMark (HighMark-31) | All Rights Reserved Where Not Granted
+================================================================================
