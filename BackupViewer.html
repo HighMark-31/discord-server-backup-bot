@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Backup Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        discord: {
+                            dark: '#202225',
+                            sidebar: '#2f3136',
+                            chat: '#36393f',
+                            header: '#36393f',
+                            hover: '#393c43',
+                            active: '#393c43',
+                            text: '#dcddde',
+                            muted: '#72767d',
+                            divider: '#2f3136',
+                            accent: '#5865F2',
+                            green: '#3BA55C',
+                            red: '#ED4245',
+                            members: '#2f3136'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=gg+sans:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'gg sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #36393f;
+            color: #dcddde;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background-color: #2f3136;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #202225;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #2f3136;
+        }
+
+        .channel-item:hover {
+            background-color: #393c43;
+            color: #fff;
+        }
+        .channel-item.active {
+            background-color: #393c43;
+            color: #fff;
+        }
+        
+        .message-group:hover {
+            background-color: rgba(4, 4, 5, 0.07);
+        }
+
+        .markdown-text strong { font-weight: 700; color: white; }
+        .markdown-text em { font-style: italic; }
+        .markdown-text u { text-decoration: underline; }
+        .markdown-text s { text-decoration: line-through; }
+        .markdown-text code { 
+            background-color: #2f3136; 
+            padding: 2px 4px; 
+            border-radius: 3px; 
+            font-family: monospace; 
+            font-size: 0.85em;
+        }
+        .markdown-text pre {
+            background-color: #2f3136;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow-x: auto;
+        }
+        .markdown-text blockquote {
+            border-left: 4px solid #4f545c;
+            padding-left: 10px;
+            margin-left: 0;
+            color: #a3a6aa;
+        }
+        
+        .embed-left-border {
+            border-left: 4px solid;
+            border-radius: 4px;
+        }
+
+        .member-item:hover {
+            background-color: #393c43;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col">
+
+    <div id="file-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+        <div class="bg-discord-sidebar p-8 rounded-lg shadow-2xl max-w-2xl w-full text-center border border-gray-700">
+            <div class="mb-6">
+                <i class="fa-solid fa-server text-6xl text-discord-accent mb-4"></i>
+                <h1 class="text-3xl font-bold text-white mb-2">Discord Backup Viewer</h1>
+                <p class="text-discord-text mb-6">
+                    Poiché i browser limitano l'accesso ai file locali per sicurezza, devi selezionare manualmente la cartella contenente i tuoi backup.
+                    <br><br>
+                    <span class="text-discord-muted text-sm">Seleziona la cartella radice dove sono presenti le cartelle "backup_NomeServer_Data".</span>
+                </p>
+            </div>
+
+            <label for="folder-input" class="cursor-pointer bg-discord-accent hover:bg-indigo-600 text-white font-bold py-3 px-8 rounded transition-colors inline-flex items-center gap-2">
+                <i class="fa-solid fa-folder-open"></i> Seleziona Cartella Backup
+            </label>
+            <input type="file" id="folder-input" webkitdirectory directory multiple class="hidden">
+            
+            <p id="loading-status" class="mt-4 text-discord-accent hidden">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Scansione file in corso...
+            </p>
+        </div>
+    </div>
+
+    <div id="backup-modal" class="fixed inset-0 bg-black/80 z-40 flex items-center justify-center p-4 hidden">
+        <div class="bg-discord-sidebar p-6 rounded-lg shadow-2xl max-w-3xl w-full border border-gray-700 h-[80vh] flex flex-col">
+            <h2 class="text-2xl font-bold text-white mb-4">Seleziona un Backup</h2>
+            <div id="backup-list" class="flex-1 overflow-y-auto space-y-2 pr-2">
+            </div>
+            <button onclick="location.reload()" class="mt-4 text-red-400 hover:text-red-300 text-sm">
+                <i class="fa-solid fa-arrow-left"></i> Torna alla selezione cartella
+            </button>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 z-30 flex items-center justify-center p-4 hidden">
+        <div class="bg-discord-sidebar p-6 rounded-lg shadow-2xl max-w-4xl w-full border border-gray-700 h-[80vh] flex flex-col relative">
+            <button onclick="toggleSettings()" class="absolute top-4 right-4 text-discord-muted hover:text-white">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <h2 class="text-2xl font-bold text-white mb-6">Impostazioni Server</h2>
+            
+            <div class="flex flex-1 gap-6 overflow-hidden">
+                <div class="w-48 space-y-1">
+                    <button onclick="switchTab('info')" class="tab-btn w-full text-left px-3 py-2 rounded text-white bg-discord-active font-medium">Informazioni</button>
+                    <button onclick="switchTab('roles')" class="tab-btn w-full text-left px-3 py-2 rounded text-discord-text hover:bg-discord-hover hover:text-white">Ruoli</button>
+                    <button onclick="switchTab('emojis')" class="tab-btn w-full text-left px-3 py-2 rounded text-discord-text hover:bg-discord-hover hover:text-white">Emoji</button>
+                </div>
+                
+                <div class="flex-1 bg-discord-chat rounded p-4 overflow-y-auto">
+                    <div id="tab-info" class="tab-content">
+                    </div>
+                    <div id="tab-roles" class="tab-content hidden space-y-2">
+                    </div>
+                    <div id="tab-emojis" class="tab-content hidden grid grid-cols-6 gap-4">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-interface" class="flex-1 flex hidden h-full">
+        <div class="w-64 bg-discord-sidebar flex flex-col h-full border-r border-discord-dark flex-shrink-0">
+            <div class="h-12 border-b border-black/20 flex items-center justify-between px-4 font-bold text-white shadow-sm hover:bg-discord-hover transition-colors cursor-pointer" onclick="toggleSettings()">
+                <span id="server-name" class="truncate flex-1">Server Name</span>
+                <i class="fa-solid fa-chevron-down text-sm ml-2"></i>
+            </div>
+            
+            <div class="px-2 py-2 border-b border-discord-divider">
+                <button onclick="exitBackup()" class="w-full text-left px-2 py-1 text-sm text-discord-muted hover:text-white transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Torna ai backup
+                </button>
+            </div>
+
+            <div id="channel-list" class="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-thin">
+            </div>
+
+            <div class="h-14 bg-[#292b2f] flex items-center px-2 space-x-2">
+                <div class="w-8 h-8 rounded-full bg-discord-accent flex items-center justify-center text-white text-xs">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="text-sm font-bold text-white truncate">Viewer Mode</div>
+                    <div class="text-xs text-discord-muted">#0000</div>
+                </div>
+                <div class="flex space-x-2 text-discord-muted">
+                     <i class="fa-solid fa-microphone-slash cursor-pointer hover:text-white text-sm"></i>
+                     <i class="fa-solid fa-headphones cursor-pointer hover:text-white text-sm"></i>
+                     <i class="fa-solid fa-gear cursor-pointer hover:text-white text-sm"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col bg-discord-chat min-w-0">
+            <div class="h-12 border-b border-black/20 flex items-center px-4 shadow-sm z-10 bg-discord-header">
+                <i class="fa-solid fa-hashtag text-discord-muted mr-2"></i>
+                <span id="current-channel-name" class="font-bold text-white mr-4">generale</span>
+                <span id="current-channel-topic" class="text-xs text-discord-muted truncate border-l border-discord-muted/30 pl-4 hidden md:block">
+                    Topic del canale
+                </span>
+                <div class="ml-auto flex items-center space-x-4 text-discord-muted">
+                    <i class="fa-solid fa-bell hover:text-white cursor-pointer"></i>
+                    <i class="fa-solid fa-thumbtack hover:text-white cursor-pointer"></i>
+                    <i class="fa-solid fa-user-group hover:text-white cursor-pointer md:hidden" onclick="toggleMembersMobile()"></i>
+                </div>
+            </div>
+
+            <div id="message-area" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col scrollbar-thin">
+                <div class="text-center mt-10 text-discord-muted">
+                    <i class="fa-solid fa-arrow-left"></i> Seleziona un canale per visualizzare i messaggi.
+                </div>
+            </div>
+        </div>
+
+        <div id="members-sidebar" class="w-60 bg-discord-members flex flex-col h-full border-l border-discord-dark flex-shrink-0 hidden md:flex">
+            <div class="h-12 border-b border-black/20 flex items-center px-4 font-bold text-discord-muted text-xs uppercase tracking-wide">
+                Membri
+            </div>
+            <div id="members-list" class="flex-1 overflow-y-auto p-3 space-y-4 scrollbar-thin">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let filesMap = {}; 
+        let backups = [];
+        let currentBackup = null;
+        let structure = null;
+        let messagesData = null;
+        let membersData = [];
+        let currentChannelId = null;
+
+        const folderInput = document.getElementById('folder-input');
+        const fileModal = document.getElementById('file-modal');
+        const backupModal = document.getElementById('backup-modal');
+        const appInterface = document.getElementById('app-interface');
+        const backupListEl = document.getElementById('backup-list');
+        const loadingStatus = document.getElementById('loading-status');
+        const channelListEl = document.getElementById('channel-list');
+        const messageArea = document.getElementById('message-area');
+        const serverNameEl = document.getElementById('server-name');
+        const currentChannelNameEl = document.getElementById('current-channel-name');
+        const currentChannelTopicEl = document.getElementById('current-channel-topic');
+        const membersListEl = document.getElementById('members-list');
+        const settingsModal = document.getElementById('settings-modal');
+
+        const readFile = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        };
+
+        const exitBackup = () => {
+            appInterface.classList.add('hidden');
+            backupModal.classList.remove('hidden');
+            currentBackup = null;
+            structure = null;
+            messagesData = null;
+            membersData = [];
+        };
+
+        const toggleSettings = () => {
+            settingsModal.classList.toggle('hidden');
+            if (!settingsModal.classList.contains('hidden')) {
+                renderSettings();
+            }
+        };
+
+        const switchTab = (tab) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-discord-active', 'text-white', 'font-medium');
+                el.classList.add('text-discord-text');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tab));
+            if (activeBtn) {
+                activeBtn.classList.add('bg-discord-active', 'text-white', 'font-medium');
+                activeBtn.classList.remove('text-discord-text');
+            }
+        };
+
+        folderInput.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            loadingStatus.classList.remove('hidden');
+            filesMap = {};
+            
+            for (const file of files) {
+                filesMap[file.webkitRelativePath] = file;
+            }
+
+            backups = [];
+            const folders = new Set();
+            
+            files.forEach(f => {
+                const pathParts = f.webkitRelativePath.split('/');
+                const fileName = pathParts.pop(); 
+                const folderPath = pathParts.join('/'); 
+                
+                if (fileName.startsWith('backup_') && fileName.endsWith('.json') && fileName !== 'backup_data.json') {
+                    folders.add(folderPath);
+                }
+                
+                if (fileName === 'server_info.txt') {
+                    folders.add(folderPath);
+                }
+
+                if (pathParts.some(p => p.startsWith('backup_')) && fileName.endsWith('.txt')) {
+                    let currentPath = "";
+                    for (const part of pathParts) {
+                        currentPath += (currentPath ? "/" : "") + part;
+                        if (part.startsWith('backup_')) {
+                            folders.add(currentPath);
+                            break;
+                        }
+                    }
+                }
+            });
+
+            console.log("Cartelle candidate trovate:", Array.from(folders));
+
+            for (const folder of folders) {
+                const metaFile = files.find(f => 
+                    f.webkitRelativePath.startsWith(folder + '/') && 
+                    f.name.startsWith('backup_') && 
+                    f.name.endsWith('.json') && 
+                    f.name !== 'backup_data.json' &&
+                    f.webkitRelativePath.split('/').length === folder.split('/').length + 1
+                );
+                
+                if (metaFile) {
+                    try {
+                        const content = await readFile(metaFile);
+                        const json = JSON.parse(content);
+                        const structurePath = folder + '/' + json.structure_file.split('/').pop();
+                        const dataPath = json.data_file ? folder + '/' + json.data_file.split('/').pop() : null;
+
+                        backups.push({
+                            type: 'modern',
+                            meta: json,
+                            path: metaFile.webkitRelativePath,
+                            folder: folder,
+                            structureFile: filesMap[structurePath],
+                            dataFile: dataPath ? filesMap[dataPath] : null
+                        });
+                    } catch (e) { console.warn("Error parsing meta", e); }
+                } else {
+                    const infoFile = files.find(f => f.webkitRelativePath === `${folder}/server_info.txt`);
+                    const hasTxtLogs = files.some(f => f.webkitRelativePath.startsWith(`${folder}/`) && f.name.endsWith('.txt'));
+                    
+                    const folderName = folder.split('/').pop();
+
+                    if (infoFile || (folderName.startsWith('backup_') && hasTxtLogs)) {
+                        try {
+                            let nameMatch = null;
+                            let createdMatch = null;
+                            
+                            if (infoFile) {
+                                const infoContent = await readFile(infoFile);
+                                nameMatch = infoContent.match(/Server Name: (.*)/);
+                                createdMatch = infoContent.match(/Created At: (.*)/);
+                            }
+                            
+                            const rolesFile = files.find(f => f.webkitRelativePath === `${folder}/roles.txt`);
+                            const membersFile = files.find(f => f.webkitRelativePath === `${folder}/member_list.txt`);
+                            
+                            backups.push({
+                                type: 'legacy',
+                                meta: {
+                                    guild_name: nameMatch ? nameMatch[1] : folderName.replace('backup_', '').split('_')[0],
+                                    created_at: createdMatch ? createdMatch[1] : new Date().toISOString(),
+                                    method: 'txt (legacy)',
+                                    mode: 'unknown'
+                                },
+                                folder: folder,
+                                infoFile: infoFile,
+                                rolesFile: rolesFile,
+                                membersFile: membersFile
+                            });
+                        } catch (e) { console.warn("Error parsing legacy", e); }
+                    }
+                }
+            }
+
+            loadingStatus.classList.add('hidden');
+            showBackupSelection();
+        });
+
+        function showBackupSelection() {
+            fileModal.classList.add('hidden');
+            backupModal.classList.remove('hidden');
+            backupListEl.innerHTML = '';
+
+            if (backups.length === 0) {
+                backupListEl.innerHTML = '<div class="text-center text-red-400 p-4">Nessun backup valido trovato.</div>';
+                return;
+            }
+
+            backups.sort((a, b) => new Date(b.meta.created_at || 0) - new Date(a.meta.created_at || 0));
+
+            backups.forEach((bk, index) => {
+                const div = document.createElement('div');
+                div.className = 'bg-[#2f3136] p-4 rounded hover:bg-[#393c43] cursor-pointer transition flex justify-between items-center border border-gray-700';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-bold text-white text-lg flex items-center gap-2">
+                            ${bk.meta.guild_name}
+                            ${bk.type === 'legacy' ? '<span class="bg-yellow-600 text-white text-[10px] px-1 rounded uppercase">Legacy</span>' : ''}
+                        </div>
+                        <div class="text-sm text-discord-muted">
+                            <i class="fa-regular fa-clock"></i> ${new Date(bk.meta.created_at).toLocaleString()} | 
+                            <span class="uppercase text-xs bg-discord-accent px-2 py-0.5 rounded text-white">${bk.meta.method}</span>
+                        </div>
+                    </div>
+                    <div class="text-discord-muted">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                `;
+                div.onclick = () => loadBackup(index);
+                backupListEl.appendChild(div);
+            });
+        }
+
+        async function loadBackup(index) {
+            currentBackup = null;
+            structure = null;
+            messagesData = null;
+            membersData = [];
+            currentChannelId = null;
+            messageArea.innerHTML = '';
+            channelListEl.innerHTML = '';
+            membersListEl.innerHTML = '';
+            serverNameEl.textContent = 'Caricamento...';
+            
+            const bk = backups[index];
+            currentBackup = bk;
+
+            try {
+                if (bk.type === 'modern') {
+                    await loadModernBackup(bk);
+                } else {
+                    await loadLegacyBackup(bk);
+                }
+                
+                renderUI();
+                renderMembers();
+                backupModal.classList.add('hidden');
+                appInterface.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                alert("Errore caricamento backup: " + err.message);
+            }
+        }
+
+        async function loadModernBackup(bk) {
+            if (!bk.structureFile) throw new Error("File struttura mancante.");
+            structure = JSON.parse(await readFile(bk.structureFile));
+            
+            if (bk.meta.method === 'json' && bk.dataFile) {
+                messagesData = JSON.parse(await readFile(bk.dataFile));
+            } else {
+                messagesData = { channels: [] };
+                if (bk.meta.method !== 'json') {
+                     await parseTxtLogs(bk.folder);
+                }
+            }
+
+            const memFile = Object.values(filesMap).find(f => f.webkitRelativePath === `${bk.folder}/member_list.txt`);
+            if (memFile) {
+                await parseMemberList(memFile);
+            }
+        }
+
+        async function loadLegacyBackup(bk) {
+            structure = {
+                info: {},
+                roles: [],
+                categories: [],
+                channels: [],
+                emojis: []
+            };
+
+            if (bk.infoFile) {
+                const txt = await readFile(bk.infoFile);
+                txt.split('\n').forEach(line => {
+                    if (line.startsWith('Server Name:')) structure.info.guild_name = line.split(':')[1].trim();
+                    if (line.startsWith('Server ID:')) structure.info.guild_id = line.split(':')[1].trim();
+                    if (line.startsWith('Member Count:')) structure.info.member_count = line.split(':')[1].trim();
+                    if (line.startsWith('Owner:')) structure.info.owner = line.split(':')[1].trim();
+                });
+            }
+            if (!structure.info.guild_name) structure.info.guild_name = bk.meta.guild_name;
+
+            if (bk.rolesFile) {
+                const txt = await readFile(bk.rolesFile);
+                txt.split('\n').forEach(line => {
+                    if (line.trim()) {
+                        const match = line.match(/(.*) \(ID: (\d+)\)/);
+                        if (match) {
+                            structure.roles.push({ name: match[1], id: match[2], color: 0 }); // basic
+                        }
+                    }
+                });
+            }
+
+            if (bk.membersFile) {
+                await parseMemberList(bk.membersFile);
+            }
+
+            await parseTxtLogs(bk.folder);
+        }
+
+        async function parseMemberList(file) {
+            const txt = await readFile(file);
+            const chunks = txt.split('---');
+            membersData = [];
+            
+            chunks.forEach(chunk => {
+                if (!chunk.trim()) return;
+                const member = { roles: [] };
+                chunk.split('\n').forEach(line => {
+                    if (line.includes('Username:')) member.username = line.split('|')[0].replace('Username:', '').trim();
+                    if (line.includes('ID:')) member.id = line.split('|')[1].replace('ID:', '').trim();
+                    if (line.includes('Roles:')) {
+                        const rolesStr = line.replace('Roles:', '').trim();
+                        if (rolesStr && rolesStr !== 'None') {
+                            member.roles = rolesStr.split(',').map(r => r.trim());
+                        }
+                    }
+                });
+                if (member.username) membersData.push(member);
+            });
+        }
+
+        async function parseTxtLogs(folder) {
+            messagesData = { channels: [] };
+            structure.channels = []; 
+            
+            const logFiles = Object.values(filesMap).filter(f => 
+                (f.webkitRelativePath.startsWith(`${folder}/logs/`) || f.webkitRelativePath.split('/').length === 2) &&
+                f.webkitRelativePath.startsWith(folder + '/') &&
+                f.name.endsWith('.txt') && 
+                !['server_info.txt', 'roles.txt', 'member_list.txt', 'errors.txt'].includes(f.name)
+            );
+
+            for (const f of logFiles) {
+                const channelName = f.name.replace('.txt', '');
+                const content = await readFile(f);
+                const messages = [];
+                const lines = content.split('\n');
+                
+                let currentMsg = null;
+
+                lines.forEach(line => {
+                    const match = line.match(/^\[(.*?)\] (.*?): (.*)/);
+                    if (match) {
+                        if (currentMsg) messages.push(currentMsg);
+                        currentMsg = {
+                            author_tag: match[2],
+                            created_at: match[1],
+                            content: match[3],
+                            attachments: [],
+                            embeds: []
+                        };
+                    } else if (line.startsWith('[EMBED')) {
+                        try {
+                            const jsonStr = line.substring(line.indexOf('{'));
+                            if (currentMsg) currentMsg.embeds.push(JSON.parse(jsonStr));
+                        } catch(e) {}
+                    } else if (line.startsWith('[ATTACHMENT]')) {
+                         if (currentMsg) {
+                             const parts = line.split('->');
+                             if (parts.length > 1) {
+                                 const filename = parts[0].replace('[ATTACHMENT]', '').trim();
+                                 const path = parts[1].trim();
+                                 currentMsg.attachments.push({ filename, saved_path: path });
+                             }
+                         }
+                    } else {
+                        if (currentMsg) currentMsg.content += '\n' + line;
+                    }
+                });
+                if (currentMsg) messages.push(currentMsg);
+
+                const cid = channelName; 
+                structure.channels.push({ id: cid, name: channelName, category_id: null });
+                messagesData.channels.push({ id: cid, name: channelName, messages: messages });
+            }
+        }
+
+        function renderUI() {
+            serverNameEl.textContent = structure.info.guild_name || 'Server Backup';
+            channelListEl.innerHTML = '';
+
+            const categories = {};
+            if (structure.categories) {
+                structure.categories.sort((a, b) => a.position - b.position).forEach(cat => {
+                    categories[cat.id] = { ...cat, channels: [] };
+                });
+            }
+            categories['null'] = { id: null, name: 'Canali', position: -1, channels: [] };
+
+            structure.channels.forEach(ch => {
+                const catId = ch.category_id || 'null';
+                if (categories[catId]) {
+                    categories[catId].channels.push(ch);
+                } else {
+                    categories['null'].channels.push(ch);
+                }
+            });
+
+            Object.values(categories).sort((a, b) => a.position - b.position).forEach(cat => {
+                if (cat.channels.length === 0 && cat.id !== null) return;
+
+                if (cat.id !== null) {
+                    const catDiv = document.createElement('div');
+                    catDiv.className = 'mt-4 mb-1 px-2 text-xs font-bold text-discord-muted uppercase hover:text-discord-text transition-colors cursor-pointer flex justify-between items-center group';
+                    catDiv.innerHTML = `<span>${cat.name}</span> <i class="fa-solid fa-chevron-down text-[10px] hidden group-hover:block"></i>`;
+                    channelListEl.appendChild(catDiv);
+                }
+
+                cat.channels.sort((a, b) => (a.position || 0) - (b.position || 0)).forEach(ch => {
+                    const chDiv = document.createElement('div');
+                    chDiv.className = 'channel-item px-2 py-1.5 mx-1 rounded text-discord-text cursor-pointer flex items-center gap-2 group mb-0.5';
+                    chDiv.dataset.id = ch.id;
+                    chDiv.innerHTML = `
+                        <i class="fa-solid fa-hashtag text-discord-muted text-sm group-hover:text-white"></i>
+                        <span class="truncate font-medium">${ch.name}</span>
+                    `;
+                    chDiv.onclick = () => selectChannel(ch.id);
+                    channelListEl.appendChild(chDiv);
+                });
+            });
+        }
+
+        function renderMembers() {
+            membersListEl.innerHTML = '';
+            
+            
+            const groupDiv = document.createElement('div');
+            groupDiv.innerHTML = `<div class="font-bold text-discord-muted text-xs uppercase mb-2 px-2">Membri — ${membersData.length}</div>`;
+            membersListEl.appendChild(groupDiv);
+
+            membersData.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'member-item flex items-center gap-3 px-2 py-1.5 rounded cursor-pointer opacity-90 hover:opacity-100';
+                
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-discord-sidebar flex items-center justify-center text-xs overflow-hidden">
+                        <i class="fa-solid fa-user text-discord-muted"></i>
+                    </div>
+                    <div>
+                        <div class="text-white text-sm font-medium ${m.roles.includes('Admin') ? 'text-red-400' : ''}">${m.username}</div>
+                        ${m.roles.length > 0 ? `<div class="text-[10px] text-discord-muted truncate w-32">${m.roles[0]}</div>` : ''}
+                    </div>
+                `;
+                membersListEl.appendChild(div);
+            });
+
+            if (membersData.length === 0) {
+                membersListEl.innerHTML = '<div class="text-center text-discord-muted text-xs mt-4">Nessun membro trovato</div>';
+            }
+        }
+
+        function renderSettings() {
+            const info = structure.info || {};
+            document.getElementById('tab-info').innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-20 h-20 bg-discord-accent rounded-full flex items-center justify-center text-3xl text-white">
+                            ${(info.guild_name || '?').charAt(0)}
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${info.guild_name || 'Sconosciuto'}</h3>
+                            <div class="text-discord-muted text-sm">ID: ${info.guild_id || '-'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-discord-dark p-3 rounded">
+                            <div class="text-xs uppercase text-discord-muted font-bold">Owner</div>
+                            <div class="text-white">${info.owner || info.owner_id || '-'}</div>
+                        </div>
+                        <div class="bg-discord-dark p-3 rounded">
+                            <div class="text-xs uppercase text-discord-muted font-bold">Membri</div>
+                            <div class="text-white">${info.member_count || membersData.length || '-'}</div>
+                        </div>
+                        <div class="bg-discord-dark p-3 rounded">
+                            <div class="text-xs uppercase text-discord-muted font-bold">Creato il</div>
+                            <div class="text-white">${info.created_at ? new Date(info.created_at).toLocaleDateString() : '-'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const rolesHtml = (structure.roles || []).sort((a, b) => (b.position || 0) - (a.position || 0)).map(r => `
+                <div class="flex items-center justify-between bg-discord-dark p-2 rounded">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full" style="background-color: ${r.color ? '#' + r.color.toString(16).padStart(6, '0') : '#99aab5'}"></div>
+                        <span class="text-white font-medium">${r.name}</span>
+                    </div>
+                    <code class="text-xs text-discord-muted">${r.id}</code>
+                </div>
+            `).join('');
+            document.getElementById('tab-roles').innerHTML = rolesHtml || '<div class="text-discord-muted">Nessun ruolo salvato</div>';
+
+            const emojiHtml = (structure.emojis || []).map(e => {
+                let src = e.url; 
+                
+                const localFile = Object.values(filesMap).find(f => f.name.startsWith(e.name + '.') && f.webkitRelativePath.includes('/emoji/'));
+                if (localFile) {
+                    src = URL.createObjectURL(localFile);
+                }
+
+                return `
+                    <div class="bg-discord-dark p-2 rounded flex flex-col items-center gap-2" title="${e.name}">
+                        <img src="${src}" class="w-8 h-8 object-contain" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+                        <span class="text-xs text-discord-muted truncate w-full text-center">${e.name}</span>
+                    </div>
+                `;
+            }).join('');
+             document.getElementById('tab-emojis').innerHTML = emojiHtml || '<div class="text-discord-muted col-span-6">Nessuna emoji salvata</div>';
+        }
+
+        function selectChannel(channelId) {
+            currentChannelId = channelId;
+            
+            document.querySelectorAll('.channel-item').forEach(el => {
+                if (el.dataset.id == channelId) el.classList.add('active', 'bg-gray-700', 'text-white');
+                else el.classList.remove('active', 'bg-gray-700', 'text-white');
+            });
+
+            // Find channel info
+            let channelInfo = structure.channels.find(c => c.id == channelId);
+            if (!channelInfo) {
+                // If legacy with string IDs
+                channelInfo = { name: channelId, topic: '' };
+            }
+
+            if (channelInfo) {
+                currentChannelNameEl.textContent = channelInfo.name;
+                currentChannelTopicEl.textContent = channelInfo.topic || '';
+            }
+
+            renderMessages(channelId);
+        }
+
+        async function renderMessages(channelId) {
+            messageArea.innerHTML = '';
+            
+            if (!messagesData || !messagesData.channels) {
+                messageArea.innerHTML = '<div class="text-center mt-10 text-discord-muted">Nessun dato messaggi disponibile.</div>';
+                return;
+            }
+
+            const channelData = messagesData.channels.find(c => c.id == channelId);
+            
+            if (!channelData || !channelData.messages || channelData.messages.length === 0) {
+                 messageArea.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-discord-muted">
+                        <div class="bg-discord-sidebar p-4 rounded-full mb-4">
+                            <i class="fa-solid fa-hashtag text-4xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Benvenuto in #${currentChannelNameEl.textContent}!</h3>
+                        <p>Questo è l'inizio del canale.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+
+            for (const msg of channelData.messages) {
+                const msgGroup = document.createElement('div');
+                msgGroup.className = 'message-group flex px-4 py-1 mt-0.5 group hover:bg-[#32353b] pr-4';
+                
+                let timeStr = '', dateStr = '';
+                try {
+                    const date = new Date(msg.created_at);
+                    if (!isNaN(date)) {
+                        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        dateStr = date.toLocaleDateString();
+                    } else {
+                        dateStr = msg.created_at;
+                    }
+                } catch(e) { dateStr = 'Unknown'; }
+
+                let attachmentsHTML = '';
+                if (msg.attachments && msg.attachments.length > 0) {
+                    attachmentsHTML = '<div class="flex flex-wrap gap-2 mt-2">';
+                    for (const att of msg.attachments) {
+                        
+                        let fileKey = null;
+                        if (att.saved_path) {
+                             const relPath = att.saved_path.replace(/\\/g, '/');
+                             
+                             let attempt = currentBackup.folder + '/' + relPath;
+                             if (filesMap[attempt]) fileKey = attempt;
+                             
+                        }
+                        
+                        if (!fileKey) {
+                             const channelName = channelData.name; 
+                             const candidate = Object.keys(filesMap).find(k => k.startsWith(currentBackup.folder + '/') && k.endsWith(att.filename));
+                             if (candidate) fileKey = candidate;
+                        }
+
+                        const file = filesMap[fileKey];
+                        if (file) {
+                            const url = URL.createObjectURL(file);
+                            if (att.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                                attachmentsHTML += `<a href="${url}" target="_blank"><img src="${url}" class="max-w-xs max-h-80 rounded cursor-pointer hover:shadow-lg transition"></a>`;
+                            } else {
+                                attachmentsHTML += `<a href="${url}" download="${att.filename}" class="flex items-center gap-2 bg-[#2f3136] p-3 rounded border border-[#202225] text-discord-accent hover:underline"><i class="fa-solid fa-file"></i> ${att.filename}</a>`;
+                            }
+                        } else {
+                            attachmentsHTML += `<div class="text-red-400 text-sm"><i class="fa-solid fa-triangle-exclamation"></i> File mancante: ${att.filename}</div>`;
+                        }
+                    }
+                    attachmentsHTML += '</div>';
+                }
+
+                let embedsHTML = '';
+                if (msg.embeds && msg.embeds.length > 0) {
+                    for (const embed of msg.embeds) {
+                        const color = embed.color ? '#' + embed.color.toString(16).padStart(6, '0') : '#202225';
+                        const title = embed.title ? `<div class="font-bold text-white mb-1">${embed.title}</div>` : '';
+                        const desc = embed.description ? `<div class="text-discord-text text-sm mb-2">${formatMarkdown(embed.description)}</div>` : '';
+                        
+                        let fieldsHTML = '';
+                        if (embed.fields) {
+                            fieldsHTML = '<div class="grid grid-cols-12 gap-2 mt-2">';
+                            embed.fields.forEach(f => {
+                                const colSpan = f.inline ? 'col-span-4' : 'col-span-12';
+                                fieldsHTML += `
+                                    <div class="${colSpan}">
+                                        <div class="text-xs font-bold text-discord-muted uppercase mb-0.5">${f.name}</div>
+                                        <div class="text-sm text-discord-text">${formatMarkdown(f.value)}</div>
+                                    </div>
+                                `;
+                            });
+                            fieldsHTML += '</div>';
+                        }
+                        
+                        embedsHTML += `
+                            <div class="mt-2 bg-[#2f3136] p-3 rounded embed-left-border max-w-xl" style="border-left-color: ${color}">
+                                <div class="flex gap-4">
+                                    <div class="flex-1">
+                                        ${title}
+                                        ${desc}
+                                        ${fieldsHTML}
+                                    </div>
+                                    ${embed.thumbnail ? `<img src="${embed.thumbnail.url}" class="w-20 h-20 object-cover rounded ml-2">` : ''}
+                                </div>
+                                ${embed.image ? `<img src="${embed.image.url}" class="mt-3 w-full rounded">` : ''}
+                                ${embed.footer ? `<div class="mt-2 text-xs text-discord-muted flex items-center gap-1">${embed.footer.icon_url ? `<img src="${embed.footer.icon_url}" class="w-4 h-4 rounded-full">` : ''} ${embed.footer.text}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                }
+
+                msgGroup.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-discord-sidebar flex-shrink-0 mr-4 flex items-center justify-center mt-0.5 overflow-hidden">
+                        <i class="fa-solid fa-user text-discord-muted"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-medium text-white hover:underline cursor-pointer">${msg.author_tag.split('#')[0]}</span>
+                            <span class="text-xs text-discord-muted">${dateStr} ${timeStr}</span>
+                        </div>
+                        <div class="text-discord-text whitespace-pre-wrap leading-relaxed markdown-text">${formatMarkdown(msg.content || '')}</div>
+                        ${attachmentsHTML}
+                        ${embedsHTML}
+                    </div>
+                `;
+                
+                fragment.appendChild(msgGroup);
+            }
+
+            messageArea.appendChild(fragment);
+            messageArea.classList.add('flex-col');
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let html = text
+                .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/__(.*?)__/g, '<u>$1</u>')
+                .replace(/~~(.*?)~~/g, '<s>$1</s>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+                .replace(/\n/g, '<br>');
+            return html;
+        }
+
+    </script>
+</body>
+</html>
